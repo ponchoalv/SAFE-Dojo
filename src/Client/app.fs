@@ -23,7 +23,8 @@ open Shared
 /// The different elements of the completed report.
 type Report =
     { Location : LocationResponse
-      Crimes : CrimeResponse array }
+      Crimes : CrimeResponse array
+      Weather : WeatherResponse }
 
 type ServerState = Idle | Loading | ServerError of string
 
@@ -37,6 +38,7 @@ type Model =
 /// The different types of messages in the system.
 type Msg =
     | GetReport
+    | ClearReport
     | PostcodeChanged of string
     | GotReport of Report
     | ErrorMsg of exn
@@ -51,11 +53,12 @@ let init () =
 let getResponse postcode = promise {
     let! location = Fetch.fetchAs<LocationResponse> (sprintf "/api/distance/%s" postcode) []
     let! crimes = Fetch.tryFetchAs<CrimeResponse array> (sprintf "api/crime/%s" postcode) [] |> Promise.map (Result.defaultValue [||])
+    let! weather = Fetch.fetchAs<WeatherResponse> (sprintf "api/weather/%s" postcode) []
     
     (* Task 4.5 WEATHER: Fetch the weather from the API endpoint you created.
        Then, save its value into the Report below. You'll need to add a new
        field to the Report type first, though! *)
-    return { Location = location; Crimes = crimes } }
+    return { Location = location; Crimes = crimes; Weather =  weather} }
  
 /// The update function knows how to update the model given a message.
 let update msg model =
@@ -63,6 +66,12 @@ let update msg model =
     | { ValidationError = None; Postcode = postcode }, GetReport ->
         { model with ServerState = Loading }, Cmd.ofPromise getResponse postcode GotReport ErrorMsg
     | _, GetReport -> model, Cmd.none
+    | _, ClearReport -> 
+        { model with 
+            Postcode = ""
+            ValidationError = Some ""
+            Report = None
+            ServerState = Idle}, Cmd.none
     | _, GotReport response ->
         { model with
             ValidationError = None
@@ -74,7 +83,9 @@ let update msg model =
             Postcode = p
             (* Task 2.2 Validation. Use the Validation.validatePostcode function to implement client-side form validation.
                Note that the validation is the same shared code that runs on the server! *)
-            ValidationError = None }, Cmd.none
+            ValidationError = match Validation.validatePostcode p with
+                                |true -> None
+                                |false -> Some "Invalid postcode" }, Cmd.none
     | _, ErrorMsg e -> { model with ServerState = ServerError e.Message }, Cmd.none
 
 [<AutoOpen>]
@@ -107,15 +118,19 @@ module ViewParts =
         sprintf "https://www.bing.com/maps/embed?h=400&w=800&cp=%f~%f&lvl=11&typ=s&FORM=MBEDV8" latLong.Latitude latLong.Longitude
 
     let bingMapTile (latLong:LatLong) =
+        let bingUrl = getBingMapUrl latLong
+
         basicTile "Map" [ Tile.Size Tile.Is12 ] [
             iframe [
                 Style [ Height 410; Width 810 ]
                 (* Task 3.1 MAPS: Use the getBingMapUrl function to build a valid maps URL using the supplied LatLong.
                    You can use it to add a Src attribute to this iframe. *)
+                Src bingUrl
             ] [ ]
         ]
 
     let weatherTile weatherReport =
+        
         childTile "Weather" [
             Level.level [ ] [
                 Level.item [ Level.Item.HasTextCentered ] [
@@ -129,7 +144,7 @@ module ViewParts =
                             Heading.h3 [ Heading.Is4; Heading.Props [ Style [ Width "100%" ] ] ] [
                                 (* Task 4.4 WEATHER: Get the temperature from the given weather report
                                    and display it here instead of an empty string. *)
-                                str ""
+                                str (sprintf "%.1f C°" weatherReport.AverageTemperature)
                             ]
                         ]
                     ]
@@ -151,7 +166,7 @@ let view model dispatch =
     div [] [
         Navbar.navbar [ Navbar.Color IsPrimary ] [
             Navbar.Item.div [] [
-                Heading.h1 [] [ str "Location Review!" ] ]
+                Heading.h1 [] [ str "Location Review!!!" ] ]
             ]
         
         Container.container [] [
@@ -184,7 +199,16 @@ let view model dispatch =
                                       Button.OnClick (fun _ -> dispatch GetReport)
                                       Button.Disabled (model.ValidationError.IsSome)
                                       Button.IsLoading (model.ServerState = ServerState.Loading) ]
-                                    [ str "Submit" ] ] ] ]
+                                    [ str "Submit" ] ] 
+                            Level.item [] [
+                                Button.button
+                                    [ Button.IsFullwidth
+                                      Button.Color IsDanger
+                                      Button.OnClick (fun _ -> dispatch ClearReport)
+                                      Button.Disabled (model.Report.IsNone)
+                                      Button.IsLoading (model.ServerState = ServerState.Loading)]  
+                                    [ str "Clear"]
+                            ]] ]
 
                 ]
 
@@ -213,11 +237,12 @@ let view model dispatch =
                             (* Task 4.6 WEATHER: Generate the view code for the weather tile
                                using the weatherTile function, supplying the weather report
                                from the model, and include it here as part of the list *)
+                            weatherTile model.Weather
                         ]
                         Tile.parent [ Tile.Size Tile.Is8 ] [
                             crimeTile model.Crimes
                         ]                   
-                  ]        
+                   ]        
         ]
 
         br [ ]

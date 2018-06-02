@@ -7,6 +7,7 @@ open Microsoft.AspNetCore.Http
 open Saturn
 open Shared
 
+
 let private london = { Latitude = 51.5074; Longitude = 0.1278 }
 let invalidPostcode next (ctx:HttpContext) =
     ctx.SetStatusCode 400
@@ -44,11 +45,21 @@ let getWeather postcode next ctx = task {
     (* Task 4.1 WEATHER: Implement a function that retrieves the weather for
        the given postcode. Use the GeoLocation.getLocation, Weather.getWeatherForPosition and
        asWeatherResponse functions to create and return a WeatherResponse instead of the stub. *)
-    return! json { WeatherType = WeatherType.Clear; AverageTemperature = 0. } next ctx }
+
+    if Validation.validatePostcode postcode then
+        let! location = getLocation postcode
+        let! weather = getWeatherForPosition location.LatLong
+        return! json (asWeatherResponse weather) next ctx
+   else return! invalidPostcode next ctx }
 
 let apiRouter = scope {
     pipe_through (pipeline { set_header "x-pipeline-type" "Api" })
+    
     getf "/distance/%s" getDistanceFromLondon
+    
+    getf "/crime/%s" getCrimeReport
+
+    getf "/weather/%s" getWeather
     
     (* Task 1.0 CRIME: Add a new /crime/{postcode} endpoint to return crime data
        using the getCrimeReport web part function. Use the above distance

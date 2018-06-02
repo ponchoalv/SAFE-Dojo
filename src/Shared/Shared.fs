@@ -21,6 +21,7 @@ type WeatherType =
     | HeavyCloud
     | LightCloud
     | Clear
+
     static member Parse =
         let weatherTypes = FSharp.Reflection.FSharpType.GetUnionCases typeof<WeatherType>
         fun (s:string) ->
@@ -33,6 +34,8 @@ type WeatherType =
         | LightRain -> "lr" | Showers -> "s" | HeavyCloud -> "hc" | LightCloud -> "lc" | Clear -> "c"
 
 type WeatherResponse = { WeatherType : WeatherType; AverageTemperature : float }
+
+type PostcodeRequest = { Postcode : string }
 
 /// Provides validation on data. Shared across both client and server.
 module Validation =

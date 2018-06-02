@@ -3,7 +3,9 @@ module App
 open Elmish
 
 open Fable
+open Fable.Core
 open Fable.Core.JsInterop
+open Fable.Import
 open Fable.Helpers.React
 open Fable.Helpers.React.Props
 open Fable.PowerPack
@@ -50,15 +52,28 @@ let init () =
       ValidationError = None
       ServerState = Idle }, Cmd.ofMsg (PostcodeChanged "")
 
+[<AutoOpen>]
+module RequestHelper =
+        let [<PassGenerics>] postRequestAs<'T> uri requestData options =
+            Fetch.postRecord uri requestData options 
+                |> Promise.bind (fun fetched -> fetched.text()) 
+                |> Promise.map ofJson<'T>
 let getResponse postcode = promise {
-    let! location = Fetch.fetchAs<LocationResponse> (sprintf "/api/distance/%s" postcode) []
-    let! crimes = Fetch.tryFetchAs<CrimeResponse array> (sprintf "api/crime/%s" postcode) [] |> Promise.map (Result.defaultValue [||])
-    let! weather = Fetch.fetchAs<WeatherResponse> (sprintf "api/weather/%s" postcode) []
+
+  (*   let! locationReq = Fetch.postRecord "api/distance" { Postcode = postcode } []
+    let! location = locationReq.json<LocationResponse>() *)
+
+    let! location = postRequestAs<LocationResponse> "api/distance" { Postcode = postcode } []
+
+    let! crimes = postRequestAs<CrimeResponse array> "api/crime" { Postcode = postcode } []
+
+    let! weather = postRequestAs<WeatherResponse> "api/weather" { Postcode = postcode } []
     
     (* Task 4.5 WEATHER: Fetch the weather from the API endpoint you created.
        Then, save its value into the Report below. You'll need to add a new
        field to the Report type first, though! *)
-    return { Location = location; Crimes = crimes; Weather =  weather} }
+
+    return { Location = location; Crimes = crimes; Weather = weather} }
  
 /// The update function knows how to update the model given a message.
 let update msg model =
@@ -66,12 +81,7 @@ let update msg model =
     | { ValidationError = None; Postcode = postcode }, GetReport ->
         { model with ServerState = Loading }, Cmd.ofPromise getResponse postcode GotReport ErrorMsg
     | _, GetReport -> model, Cmd.none
-    | _, ClearReport -> 
-        { model with 
-            Postcode = ""
-            ValidationError = Some ""
-            Report = None
-            ServerState = Idle}, Cmd.none
+    | _, ClearReport -> init()
     | _, GotReport response ->
         { model with
             ValidationError = None

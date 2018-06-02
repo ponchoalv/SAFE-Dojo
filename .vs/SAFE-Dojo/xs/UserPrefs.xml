@@ -1,0 +1,15 @@
+﻿<Properties StartupConfiguration="{EF710CB1-9F64-4EBD-8ECB-3DBC15D29F08}|Default">
+  <MonoDevelop.Ide.Workbench ActiveDocument="src/Shared/Shared.fs">
+    <Files>
+      <File FileName="src/Shared/Shared.fs" Line="44" Column="16" />
+      <File FileName="src/Client/app.fs" Line="160" Column="31" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.ItemProperties.Server PreferredExecutionTarget="MonoDevelop.Default" />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MultiItemStartupConfigurations />
+</Properties>

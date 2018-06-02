@@ -13,14 +13,17 @@ let invalidPostcode next (ctx:HttpContext) =
     ctx.SetStatusCode 400
     text "Invalid postcode" next ctx
 
-let getDistanceFromLondon postcode next (ctx:HttpContext) = task {
+let getDistanceFromLondon next (ctx:HttpContext) = task {
+    let! { Postcode = postcode } = ctx.BindModelAsync<PostcodeRequest>()
     if Validation.validatePostcode postcode then
         let! location = getLocation postcode
         let distanceToLondon = getDistanceBetweenPositions location.LatLong london
         return! json { Postcode = postcode; Location = location; DistanceToLondon = (distanceToLondon / 1000.<meter>) } next ctx
     else return! invalidPostcode next ctx }
 
-let getCrimeReport postcode next ctx = task {
+let getCrimeReport next (ctx:HttpContext) = task {
+    let! { Postcode = postcode } = ctx.BindModelAsync<PostcodeRequest>()
+
     if Validation.validatePostcode postcode then
         let! location = getLocation postcode
         let! reports = Crime.getCrimesNearPosition location.LatLong
@@ -38,28 +41,30 @@ let private asWeatherResponse (weather:DataAccess.Weather.MetaWeatherLocation.Ro
         |> Array.countBy(fun w -> w.WeatherStateName)
         |> Array.maxBy snd
         |> fst
-        |> WeatherType.Parse
+        |> WeatherType.Parse;
       AverageTemperature = weather.ConsolidatedWeather |> Array.averageBy(fun r -> float r.TheTemp) }
 
-let getWeather postcode next ctx = task {  
+let getWeather next (ctx:HttpContext) = task {  
     (* Task 4.1 WEATHER: Implement a function that retrieves the weather for
        the given postcode. Use the GeoLocation.getLocation, Weather.getWeatherForPosition and
        asWeatherResponse functions to create and return a WeatherResponse instead of the stub. *)
 
+    let! { Postcode = postcode } = ctx.BindModelAsync<PostcodeRequest>()
+
     if Validation.validatePostcode postcode then
         let! location = getLocation postcode
         let! weather = getWeatherForPosition location.LatLong
-        return! json (asWeatherResponse weather) next ctx
+        return! json (weather |> asWeatherResponse) next ctx
    else return! invalidPostcode next ctx }
 
 let apiRouter = scope {
     pipe_through (pipeline { set_header "x-pipeline-type" "Api" })
     
-    getf "/distance/%s" getDistanceFromLondon
+    post "/distance" getDistanceFromLondon
     
-    getf "/crime/%s" getCrimeReport
+    post "/crime" getCrimeReport
 
-    getf "/weather/%s" getWeather
+    post "/weather" getWeather
     
     (* Task 1.0 CRIME: Add a new /crime/{postcode} endpoint to return crime data
        using the getCrimeReport web part function. Use the above distance

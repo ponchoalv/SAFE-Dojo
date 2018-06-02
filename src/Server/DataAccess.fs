@@ -51,3 +51,4 @@ module Weather =
             bestLocationId
             |> sprintf "https://www.metaweather.com/api/location/%d"
             |> MetaWeatherLocation.AsyncLoad }
+   

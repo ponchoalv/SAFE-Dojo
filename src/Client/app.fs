@@ -5,7 +5,6 @@ open Elmish
 open Fable
 open Fable.Core
 open Fable.Core.JsInterop
-open Fable.Import
 open Fable.Helpers.React
 open Fable.Helpers.React.Props
 open Fable.PowerPack
@@ -68,7 +67,7 @@ let getResponse postcode = promise {
     let! crimes = postRequestAs<CrimeResponse array> "api/crime" { Postcode = postcode } []
 
     let! weather = postRequestAs<WeatherResponse> "api/weather" { Postcode = postcode } []
-    
+        
     (* Task 4.5 WEATHER: Fetch the weather from the API endpoint you created.
        Then, save its value into the Report below. You'll need to add a new
        field to the Report type first, though! *)

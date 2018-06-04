@@ -49,6 +49,17 @@ Target "Build" (fun () ->
   run dotnetCli "fable webpack -- -p" clientPath
 )
 
+Target "Bundle" (fun _ ->
+    let serverDir = deployDir </> "Server"
+    let clientDir = deployDir </> "Client"
+    let publicDir = clientDir </> "public"
+
+    let publishArgs = sprintf "publish -c Release -o \"%s\"" serverDir
+    run dotnetCli publishArgs serverPath
+
+    CopyDir publicDir "src/Client/public" allFiles
+)
+
 Target "Run" (fun () ->
   let server = async { run dotnetCli "watch run" serverPath }
   let client = async { run dotnetCli "fable webpack-dev-server" clientPath }

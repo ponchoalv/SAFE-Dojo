@@ -4,12 +4,17 @@ open Giraffe.Serialization
 open Microsoft.Extensions.DependencyInjection
 open Saturn
 open System.IO
+open Microsoft.IdentityModel.Logging
 
-let clientPath = Path.Combine("..","Client") |> Path.GetFullPath
+let clientPath = [".."; "Client"; "public"]
+                  |> List.reduce (fun comb srt -> Path.Combine (comb, srt))
+
+LogHelper.LogInformation (sprintf "clientPath %s" clientPath)
+
 let port = 8085us
 
 let browserRouter = scope {
-    get "/" (htmlFile (Path.Combine(clientPath, "/index.html"))) }
+    get "/" (htmlFile "index.html") }
 
 let mainRouter = scope {
     forward "/api" apiRouter

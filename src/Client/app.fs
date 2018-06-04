@@ -175,7 +175,7 @@ let view model dispatch =
     div [] [
         Navbar.navbar [ Navbar.Color IsPrimary ] [
             Navbar.Item.div [] [
-                Heading.h1 [] [ str "Location Review!!!" ] ]
+                Heading.h1 [] [ str "Location Review!" ] ]
             ]
         
         Container.container [] [

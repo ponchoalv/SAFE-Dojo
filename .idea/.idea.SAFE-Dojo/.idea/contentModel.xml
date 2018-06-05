@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ContentModelStore">
+    <e p="C:\Users\ponch\.Rider2018.1\system\resharper-host\Local\Transient\ReSharperHost\v12\SolutionCaches\_SAFE-Dojo.-1527272457.00" t="ExcludeRecursive" />
+    <e p="C:\Users\ponch\projects\SAFE-Dojo" t="IncludeFlat">
+      <e p="build.fsx" t="Include" />
+      <e p="Instructions.md" t="Include" />
+      <e p="package.json" t="Include" />
+      <e p="packages" t="ExcludeRecursive" />
+      <e p="paket.dependencies" t="Include" />
+      <e p="paket.lock" t="Include" />
+      <e p="SAFE-Dojo.sln" t="IncludeFlat" />
+      <e p="Solution Items" t="Include" />
+      <e p="src\Client" t="IncludeRecursive">
+        <e p="app.fs" t="Include" />
+        <e p="bin" t="ExcludeRecursive" />
+        <e p="Client.fs" t="Include" />
+        <e p="Client.fsproj" t="IncludeRecursive" />
+        <e p="obj" t="ExcludeRecursive" />
+        <e p="ViewHelpers.fs" t="Include" />
+      </e>
+      <e p="src\Server" t="IncludeRecursive">
+        <e p="Api.fs" t="Include" />
+        <e p="bin" t="ExcludeRecursive" />
+        <e p="DataAccess.fs" t="Include" />
+        <e p="obj" t="ExcludeRecursive" />
+        <e p="Server.fs" t="Include" />
+        <e p="Server.fsproj" t="IncludeRecursive" />
+      </e>
+      <e p="src\Shared\Shared.fs" t="Include" />
+    </e>
+  </component>
+</project>

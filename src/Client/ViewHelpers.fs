@@ -3,7 +3,6 @@ module ViewHelpers
 
 open Fable.Helpers.React
 open Fable.Helpers.React.Props
-
 open Fulma
 open Fulma.Elements
 open Fulma.Elements.Form
@@ -11,27 +10,26 @@ open Fulma.Elements.Form
 module KeyCode =
     let enter = 13.
     let upArrow = 38.
-    let downArrow =  40.
+    let downArrow = 40.
 
 let onKeyDown keyCode action =
-    OnKeyDown (fun (ev:Fable.Import.React.KeyboardEvent) ->
-        if ev.keyCode = keyCode then
+    OnKeyDown(fun (ev : Fable.Import.React.KeyboardEvent) -> 
+        if ev.keyCode = keyCode then 
             ev.preventDefault()
             action ev)
 
-let btn txt onClick = 
-    Button.button
-        [ Button.IsFullwidth
-          Button.Color IsPrimary
-          Button.OnClick onClick ] 
-        [ str txt ]
+let btn txt onClick =
+    Button.button [ Button.IsFullwidth
+                    Button.Color IsPrimary
+                    Button.OnClick onClick ] [ str txt ]
 
 let lbl txt = Label.label [] [ str txt ]
 
 let intersperse sep ls =
-    List.foldBack (fun x -> function
-        | [] -> [x]
-        | xs -> x::sep::xs) ls []
+    List.foldBack (fun x -> 
+        function 
+        | [] -> [ x ]
+        | xs -> x :: sep :: xs) ls []
 
 let safeComponents =
     let components =
@@ -39,14 +37,15 @@ let safeComponents =
           "Fable", "http://fable.io"
           "Elmish", "https://fable-elmish.github.io/"
           "Fulma", "https://mangelmaxime.github.io/Fulma" ]
-        |> List.map (fun (desc,link) -> a [ Href link ] [ str desc ] )
+        |> List.map (fun (desc, link) -> a [ Href link ] [ str desc ])
         |> intersperse (str ", ")
         |> span []
-
-    p []
-        [ strong [] [ a [ Href "https://safe-stack.github.io/" ] [ str "SAFE Template" ] ]
-          str " powered by: "
-          components ]
+    p [] [ strong [] [ a [ Href "https://safe-stack.github.io/" ] [ str "SAFE Template" ] ]
+           str " powered by: "
+           components ]
 
 module Result =
-    let defaultValue v r = match r with Ok x -> x | Error _ -> v
+    let defaultValue v r =
+        match r with
+        | Ok x -> x
+        | Error _ -> v

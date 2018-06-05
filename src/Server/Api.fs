@@ -22,18 +22,14 @@ let getDistanceFromLondon next (ctx:HttpContext) = task {
     else return! invalidPostcode next ctx }
 
 let getCrimeReport next (ctx:HttpContext) = task {
-    let! { Postcode = postcode } = ctx.BindModelAsync<PostcodeRequest>()
-
-    if Validation.validatePostcode postcode then
-        let! location = getLocation postcode
-        let! reports = Crime.getCrimesNearPosition location.LatLong
+        let! {LatLong = latlong } = ctx.BindModelAsync<Location>()
+        let! reports = Crime.getCrimesNearPosition latlong
         let crimes =
             reports
             |> Array.countBy(fun r -> r.Category)
             |> Array.sortByDescending snd
             |> Array.map(fun (k, c) -> { Crime = k; Incidents = c })
-        return! json crimes next ctx
-    else return! invalidPostcode next ctx }
+        return! json crimes next ctx }
 
 let private asWeatherResponse (weather:DataAccess.Weather.MetaWeatherLocation.Root) =
     { WeatherType =
@@ -49,13 +45,9 @@ let getWeather next (ctx:HttpContext) = task {
        the given postcode. Use the GeoLocation.getLocation, Weather.getWeatherForPosition and
        asWeatherResponse functions to create and return a WeatherResponse instead of the stub. *)
 
-    let! { Postcode = postcode } = ctx.BindModelAsync<PostcodeRequest>()
-
-    if Validation.validatePostcode postcode then
-        let! location = getLocation postcode
-        let! weather = getWeatherForPosition location.LatLong
-        return! json (weather |> asWeatherResponse) next ctx
-   else return! invalidPostcode next ctx }
+    let! {LatLong = latlong } = ctx.BindModelAsync<Location>()
+    let! weather = getWeatherForPosition latlong
+    return! json (weather |> asWeatherResponse) next ctx }
 
 let apiRouter = scope {
     pipe_through (pipeline { set_header "x-pipeline-type" "Api" })

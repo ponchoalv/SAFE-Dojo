@@ -17,6 +17,9 @@ let platformTool tool winTool =
 let nodeTool = platformTool "node" "node.exe"
 let yarnTool = platformTool "yarn" "yarn.cmd"
 
+let dotnetcliVersion = DotNetCli.GetDotNetSDKVersionFromGlobalJson()
+
+
 let mutable dotnetCli = "dotnet"
 
 let run cmd args workingDir =
@@ -29,6 +32,10 @@ let run cmd args workingDir =
 
 Target "Clean" (fun _ -> 
   CleanDirs [deployDir]
+)
+
+Target "InstallDotNetCore" (fun _ ->
+    dotnetCli <- DotNetCli.InstallDotNetSDK dotnetcliVersion
 )
 
 Target "InstallClient" (fun _ ->
@@ -76,6 +83,7 @@ Target "Run" (fun () ->
 
 
 "Clean"
+  ==> "InstallDotNetCore"
   ==> "InstallClient"
   ==> "Build"
 

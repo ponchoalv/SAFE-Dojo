@@ -1,3 +1,5 @@
+source https://www.nuget.org/api/v2
+
 group Server
   source https://api.nuget.org/v3/index.json
   storage: none
@@ -15,11 +17,13 @@ group Client
   nuget Fable.Elmish.React
   nuget Fable.Elmish.HMR
   nuget Fable.Recharts
-  nuget Fulma 1.0.0-beta-007
+  nuget Fulma
 
   clitool dotnet-fable
 
 group Build
   source https://api.nuget.org/v3/index.json
+  generate_load_scripts: true
 
   nuget FAKE
+#endif

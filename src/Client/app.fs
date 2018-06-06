@@ -25,9 +25,9 @@ type Report =
       Weather : WeatherResponse }
 
 type ServerState =
-    | Idle
-    | Loading
-    | ServerError of string
+| Idle
+| Loading
+| ServerError of string
 
 /// The overall data model driving the view.
 type Model =
@@ -43,11 +43,11 @@ type ResultReportPromise =
 
 /// The different types of messages in the system.
 type Msg =
-    | GetReport
-    | ClearReport
-    | PostcodeChanged of string
-    | GotReport of Report
-    | ErrorMsg of exn
+| GetReport
+| ClearReport
+| PostcodeChanged of string
+| GotReport of Report
+| ErrorMsg of exn
 
 /// The init function is called to start the message pump with an initial view.
 let init() =
